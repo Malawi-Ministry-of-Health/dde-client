@@ -3,6 +3,8 @@ PATH
   specs:
     dde (0.1.0)
       rails (>= 7.0.8)
+      rest-client
+      sqlite3
 
 GEM
   remote: https://rubygems.org/
@@ -209,7 +211,6 @@ PLATFORMS
 DEPENDENCIES
   dde!
   puma
-  rest-client
   sprockets-rails
   sqlite3
 
