@@ -270,9 +270,6 @@ class Dde::DdeService
 
     Person.transaction do
       person = person_service.create_person(params)
-      person_service.create_person_name(person, params)
-      person_service.create_person_address(person, params)
-      person_service.create_person_attributes(person, params)
 
       patient = Patient.create(patient_id: person.id)
       merging_service.link_local_to_remote_patient(patient, remote_patient)
@@ -285,22 +282,44 @@ class Dde::DdeService
   def dde_patient_to_local_person(dde_patient)
     attributes = dde_patient.fetch('attributes')
 
-    ActiveSupport::HashWithIndifferentAccess.new(
-      birthdate: dde_patient.fetch('birthdate'),
-      birthdate_estimated: dde_patient.fetch('birthdate_estimated'),
-      gender: dde_patient.fetch('gender'),
-      given_name: dde_patient.fetch('given_name'),
-      family_name: dde_patient.fetch('family_name'),
-      middle_name: dde_patient.fetch('middle_name'),
-      home_village: attributes.fetch('home_village'),
-      home_traditional_authority: attributes.fetch('home_traditional_authority'),
-      home_district: attributes.fetch('home_district'),
-      current_village: attributes.fetch('current_village'),
-      current_traditional_authority: attributes.fetch('current_traditional_authority'),
-      current_district: attributes.fetch('current_district')
-      # cell_phone_number: attributes.fetch('cellphone_number'),
-      # occupation: attributes.fetch('occupation')
-    )
+    # ActiveSupport::HashWithIndifferentAccess.new(
+    #   birthdate: dde_patient.fetch('birthdate'),
+    #   birthdate_estimated: dde_patient.fetch('birthdate_estimated'),
+    #   gender: dde_patient.fetch('gender'),
+    #   given_name: dde_patient.fetch('given_name'),
+    #   family_name: dde_patient.fetch('family_name'),
+    #   middle_name: dde_patient.fetch('middle_name'),
+    #   home_village: attributes.fetch('home_village'),
+    #   home_traditional_authority: attributes.fetch('home_traditional_authority'),
+    #   home_district: attributes.fetch('home_district'),
+    #   current_village: attributes.fetch('current_village'),
+    #   current_traditional_authority: attributes.fetch('current_traditional_authority'),
+    #   current_district: attributes.fetch('current_district')
+    #   # cell_phone_number: attributes.fetch('cellphone_number'),
+    #   # occupation: attributes.fetch('occupation')
+    #   )
+        {
+          birthdate: dde_patient.fetch('birthdate'),
+          birthdate_estimated: dde_patient.fetch('birthdate_estimated'),
+          gender: dde_patient.fetch('gender'),
+          names: [
+            {
+              given_name: dde_patient.fetch('given_name'),
+            family_name: dde_patient.fetch('family_name'),
+            middle_name: dde_patient.fetch('middle_name')
+            }
+          ],
+          addresses: [
+            {
+              address1: attributes.fetch('home_district'),
+              address3: attributes.fetch('current_district'),
+              county_district: attributes.fetch('home_traditional_authority'),
+              state_province: attributes.fetch('current_traditional_authority'),
+              address2: attributes.fetch('home_village'),
+              city_village: attributes.fetch('current_village')
+            }
+          ]
+        }
   end
 
   private
