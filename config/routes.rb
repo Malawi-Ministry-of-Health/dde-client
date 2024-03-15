@@ -2,7 +2,6 @@ Dde::Engine.routes.draw do
     get '/patients/find_by_npid', to: 'api/v1/dde#find_patients_by_npid'
     get '/patients/find_by_name_and_gender', to: 'api/v1/dde#find_patients_by_name_and_gender'
     get '/patients/import_by_doc_id', to: 'api/v1/dde#import_patients_by_doc_id'
-    # get '/patients/import_by_name_and_gender', to: 'api/v1/dde#import_patients_by_name_and_gender'
     get '/patients/import_by_npid', to: 'api/v1/dde#import_patients_by_npid'
     get '/patients/match_by_demographics', to: 'api/v1/dde#match_patients_by_demographics'
     get '/patients/diff', to: 'api/v1/dde#patient_diff'
