@@ -157,7 +157,7 @@ class Dde::DdeService
 
   # Similar to import_patients_by_npid but uses name and gender instead of npid
   def import_patients_by_name_and_gender(given_name, family_name, gender)
-    locals = patient_service.find_patients_by_name_and_gender(given_name, nil, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
+    locals = patient_service.find_patients_by_name_and_gender(given_name, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
     remotes = find_remote_patients_by_name_and_gender(given_name, family_name, gender)
 
     import_remote_patient(locals, remotes)
@@ -171,7 +171,7 @@ class Dde::DdeService
   end
 
   def find_patients_by_name_and_gender(given_name, family_name, gender)
-    locals = patient_service.find_patients_by_name_and_gender(given_name, nil, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
+    locals = patient_service.find_patients_by_name_and_gender(given_name, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
     remotes = find_remote_patients_by_name_and_gender(given_name, family_name, gender)
 
     package_patients(locals, remotes)
@@ -508,11 +508,13 @@ class Dde::DdeService
 
     connection = dde_connections[visit_type.id]
 
-    dde_connections[visit_type.id] = if connection
+    @dde_connections[visit_type.id] = if connection && %i[url username password].all? { |key| connection&.key?(key) }
                                         client.restore_connection(connection)
                                       else
-                                        client.connect(url: dde_config[:url], username: dde_config[:username], password: dde_config[:password])
-                                     end
+                                        client.connect(url: dde_config[:url],
+                                                       username: dde_config[:username],
+                                                       password: dde_config[:password])
+                                      end
 
     client
   end
@@ -618,6 +620,6 @@ class Dde::DdeService
 
   # A cache for all connections to dde (indexed by visit_type id)
   def dde_connections
-    @@dde_connections ||= {}
+    @dde_connections ||= {}
   end
 end
