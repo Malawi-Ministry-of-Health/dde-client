@@ -64,7 +64,8 @@ class Dde::MergingService
       merge_observations(primary_patient, secondary_patient, result)
       merge_orders(primary_patient, secondary_patient, result)
       merge_visit_types(primary_patient, secondary_patient)
-      Dde::MergeAuditService.new.create_merge_audit(primary_patient.id, secondary_patient.id, merge_type)
+      merge_patient_visits(primary_patient, secondary_patient)
+      Dde::MergeAuditService.new.create_merge_audit(primary_patient.id, secondary_patient.id, merge_type) if defined?(Dde::MergeAuditService)
       secondary_patient.void("Merged into patient ##{primary_patient.id}:0")
 
       primary_patient
@@ -352,9 +353,29 @@ class Dde::MergingService
     raise "Could not merge patient drug orders: #{drug_order.errors.as_json}" unless drug_order.errors.empty?
   end
 
+  def merge_patient_visits(primary_patient, secondary_patient)
+    return unless defined?(Visit)
+
+    Rails.logger.debug("Merging patient visits: #{primary_patient} <= #{secondary_patient}")
+
+    Visit.where(patient_id: secondary_patient.id).each do |visit|
+        primary_visit_hash = visit.attributes
+        primary_visit_hash.delete('visit_id')
+        primary_visit_hash.delete('uuid')
+        primary_visit_hash.delete('creator')
+        primary_visit_hash['patient_id'] = primary_patient.id
+        primary_visit = Visit.create!(primary_visit_hash)
+        raise "Could not merge patient visits: #{primary_visit.errors.as_json}" unless primary_visit.errors.empty?
+
+        visit.void("Merged into patient ##{primary_patient.patient_id}:#{primary_visit.id}")
+    end
+  end
+
   # strip off secondary_patient all visit_type enrollments and blesses primary patient
   # with them
   def merge_visit_types(primary_patient, secondary_patient)
+    return unless defined?(PatientVisitType)
+    
     Rails.logger.debug("Merging patient visit_types: #{primary_patient} <= #{secondary_patient}")
     PatientVisitType.where(patient_id: secondary_patient.id).each do |visit_type|
       patient_states = visit_type.patient_states
