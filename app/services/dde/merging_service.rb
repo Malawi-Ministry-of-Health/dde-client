@@ -525,7 +525,7 @@ class Dde::MergingService
     # first get all encounter to be voided, create new instances from them, then void the encounter
     Encounter.where(patient_id: secondary_patient.id).each do |encounter|
       check = Encounter.find_by(
-        'patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = DATE(?) AND visit_type_id = ?', primary_patient.id, encounter.encounter_type, encounter.encounter_datetime.to_date, encounter.visit_type_id
+        'patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = DATE(?) AND visit_id = ?', primary_patient.id, encounter.encounter_type, encounter.encounter_datetime.to_date, encounter.visit_id
       )
       if check.blank?
         encounter_map[encounter.id] = create_new_encounter(encounter, primary_patient)
@@ -546,7 +546,7 @@ class Dde::MergingService
   end
 
   def create_new_encounter(encounter, primary_patient)
-    return create_new_encounter_raw(encounter, primary_patient) if encounter.visit_type_id.blank?
+    return create_new_encounter_raw(encounter, primary_patient) if encounter.visit_id.blank?
 
     primary_encounter_hash = encounter.attributes
     primary_encounter_hash.delete('encounter_id')
