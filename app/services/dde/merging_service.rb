@@ -188,6 +188,11 @@ class Dde::MergingService
 
   # Patch primary_patient missing name data using secondary_patient
   def merge_name(primary_patient, secondary_patient)
+
+    raise "Primary Patient not found" if primary_patient.nil?
+
+    raise "Secondary Patient not found" if secondary_patient.nil?
+
     primary_name = primary_patient.person.names.first
     secondary_name = secondary_patient.person.names.first
 
