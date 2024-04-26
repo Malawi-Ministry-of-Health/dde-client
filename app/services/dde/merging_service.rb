@@ -552,9 +552,13 @@ class Dde::MergingService
     primary_encounter_hash.delete('encounter_id')
     primary_encounter_hash.delete('uuid')
     primary_encounter_hash.delete('creator')
-    primary_encounter_hash.delete('encounter_id')
+    id = primary_encounter_hash.delete('encounter_type')
     primary_encounter_hash['patient_id'] = primary_patient.id
-    primary_encounter = Encounter.create(primary_encounter_hash)
+
+    primary_encounter = Encounter.new(primary_encounter_hash)
+    primary_encounter.encounter_type = EncounterType.find(id)
+    primary_encounter.save!
+
     unless primary_encounter.errors.empty?
       raise "Could not merge patient encounters: #{primary_encounter.errors.as_json}"
     end
