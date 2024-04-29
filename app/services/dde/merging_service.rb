@@ -372,7 +372,15 @@ class Dde::MergingService
         primary_visit = Visit.create!(primary_visit_hash)
         raise "Could not merge patient visits: #{primary_visit.errors.as_json}" unless primary_visit.errors.empty?
 
+        update_encounters_visit_id(new_visit: primary_visit, old_visit_id: visit.id)
+        
         visit.void("Merged into patient ##{primary_patient.patient_id}:#{primary_visit.id}")
+    end
+  end
+
+  def update_encounters_visit_id(new_visit:, old_visit_id:)
+    Encounter.unscoped.where(visit_id: old_visit_id, patient: new_visit.patient_id).each do |encounter|
+      encounter.update(visit: new_visit)
     end
   end
 
