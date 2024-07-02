@@ -176,10 +176,16 @@ class Dde::DdeService
   end
 
   def find_patients_by_name_and_gender(given_name, family_name, gender)
-    locals = patient_service.find_patients_by_name_and_gender(given_name, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
-    remotes = find_remote_patients_by_name_and_gender(given_name, family_name, gender)
+    locals = []
+    begin
+      locals = patient_service.find_patients_by_name_and_gender(given_name, family_name, gender).limit(PATIENT_SEARCH_RESULTS_LIMIT)
+      remotes = find_remote_patients_by_name_and_gender(given_name, family_name, gender)
 
-    package_patients(locals, remotes)
+      package_patients(locals, remotes)
+    rescue StandardError => e
+      Rails.logger.warn("Error packaging patients: #{e.message}")
+      package_patients(locals, [])
+    end
   end
 
   def find_patient_updates(local_patient_id)
@@ -337,11 +343,17 @@ class Dde::DdeService
   end
 
   def find_remote_patients_by_name_and_gender(given_name, family_name, gender)
-    response, _status = dde_client.post('search_by_name_and_gender', given_name: given_name,
+    response = nil
+    begin
+      response, _status = dde_client.post('search_by_name_and_gender', given_name: given_name,
                                                                      family_name: family_name,
                                                                      gender: gender)
-    unless response.instance_of?(Array)
-      print "Patient search by name and gender failed: Dde Response => #{response}"
+      unless response.instance_of?(Array)
+        print "Patient search by name and gender failed: Dde Response => #{response}"
+        return []
+      end
+    rescue StandardError => e
+      print "Patient search by name and gender failed: Dde Response => #{e}"
       return []
     end
 

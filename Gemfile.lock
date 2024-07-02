@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dde (0.1.0)
+    dde (0.1.2)
       rails (>= 7.0.8)
       rest-client
       sqlite3

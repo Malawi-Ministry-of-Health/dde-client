@@ -134,6 +134,9 @@ class Dde::DdeClient
   rescue RestClient::NotFound => e
     LOGGER.error "DdeClient suppressed exception: #{e}"
     handle_response e.response
+  rescue RestClient::InternalServerError => e
+    LOGGER.error "DdeClient suppressed exceptionnnn: #{e}"
+    handle_response e.response
   end
 
   def handle_response(response)
