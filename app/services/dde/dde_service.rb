@@ -38,7 +38,7 @@ class Dde::DdeService
       result, status = dde_client
       response[:connection_available] = status == 200
       response[:message] = result
-    rescue => exception
+    rescue StandardError => exception
       LOGGER.error "Failed to connect to Dde: #{exception.message}"
       response[:message] = exception.message
     end
@@ -161,7 +161,7 @@ class Dde::DdeService
 
     remotes = begin
       find_remote_patients_by_name_and_gender(given_name, family_name, gender)
-    rescue
+    rescue StandardError
       []
     end
 
@@ -341,7 +341,8 @@ class Dde::DdeService
                                                                      family_name: family_name,
                                                                      gender: gender)
     unless response.instance_of?(Array)
-      raise DdeError, "Patient search by name and gender failed: Dde Response => #{response}"
+      print "Patient search by name and gender failed: Dde Response => #{response}"
+      return []
     end
 
     response
