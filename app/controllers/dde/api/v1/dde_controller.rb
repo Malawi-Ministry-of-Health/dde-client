@@ -87,6 +87,6 @@ class Dde::Api::V1::DdeController < ApplicationController
   end
 
   def visit_type
-    VisitType.find(params.require(:visit_type_id))
+    Program.find(params.require(:visit_type_id))
   end
 end

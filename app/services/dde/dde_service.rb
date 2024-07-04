@@ -104,7 +104,7 @@ class Dde::DdeService
 
     response, status = dde_client.post('update_footprint', person_uuid: doc_id,
                                                            location_id: Location.current_location_health_center.location_id,
-                                                           visit_type_id: visit_type.visit_type_id,
+                                                           visit_type_id: visit_type.id,
                                                            encounter_datetime: date || Date.tody,
                                                            user_id: creator_id || User.current.user_id)
 
@@ -572,7 +572,7 @@ class Dde::DdeService
         current_traditional_authority: person_address ? person_address.state_province : nil,
         current_village: person_address ? person_address.city_village : nil,
         home_district: person_address ? person_address.address1 : nil,
-        home_village: person_address ? person_address.address2 : nil,
+        home_village: person_address ? person_address.city_village : nil,
         home_traditional_authority: person_address ? person_address.county_district : nil,
         occupation: person_attributes ? person_attributes[:occupation] : nil
       }
